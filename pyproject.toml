@@ -1,0 +1,13 @@
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+extend-exclude = [".venv", ".ipynb_checkpoints"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip = [".venv", ".ipynb_checkpoints"]
