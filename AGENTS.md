@@ -4,8 +4,7 @@
 
 Standalone Python 3.11 research/backtesting workspace for ETF moving-average
 deviation signals. There is no package build or CI here; `pyproject.toml` is
-only for ruff/black/isort configuration, and the directory is not currently a
-git repository.
+only for ruff/black/isort configuration. The directory is a git repository.
 
 - `etf_ma_deviation_buy_signal.ipynb` - buy-only signal scan, table, and chart.
 - `etf_ma_deviation_buy_sell_signal.ipynb` - buy/sell signal scan and chart.
@@ -15,6 +14,8 @@ git repository.
 - `requirements.txt` / `requirements-dev.txt` - pinned runtime and development
   dependencies.
 - `pyproject.toml` - formatting/linting configuration only.
+- `.env.example` - template for local proxy configuration; copy to `.env`.
+- `.env` - local secrets, ignored by git. Never edit or commit its contents.
 - `.gitignore` - excludes environments, caches, secrets, and generated reports.
 - `515180_*.html` - generated backtest artifacts, ignored by git. Do not edit.
 - `.venv/`, `.ruff_cache/`, `.ipynb_checkpoints/` - local/generated state. Do not
@@ -40,9 +41,14 @@ source .venv/bin/activate          # optional
 
 # Development dependencies (includes runtime)
 .venv/bin/python -m pip install -r requirements-dev.txt
+
+# Local proxy credentials (required for live data)
+cp .env.example .env
+# edit .env and set AKSHARE_PROXY_AUTH_TOKEN
 ```
 
-Runtime dependencies are pinned in `requirements.txt`;
+Runtime dependencies are pinned in `requirements.txt` and include
+`python-dotenv`, which loads `.env` via `load_dotenv()`;
 `requirements-dev.txt` adds `ruff`, `black`, and `isort`. There is no pytest
 installation or test suite yet. Inspect `.venv/bin/pip list` before assuming a
 dependency exists. Install new dependencies into `.venv` only, and update the
@@ -66,8 +72,9 @@ appropriate requirements file.
 # Omit --inplace and pass --output /tmp/out.ipynb to leave the source untouched.
 ```
 
-Execution needs network access to the AKShare proxy. Data is fetched live and
-the backtest writes `{symbol}_..._report.html` /
+Execution needs network access to the AKShare proxy and a configured
+`AKSHARE_PROXY_AUTH_TOKEN` (via `.env` or the environment). Data is fetched live
+and the backtest writes `{symbol}_..._report.html` /
 `{symbol}_ma_deviation_review.html` in the repo root. In headless environments
 use `show=False` for plots/reports.
 
@@ -184,8 +191,9 @@ notebook. Restart the kernel and run all cells when validating a notebook.
 - Keep the AKShare proxy setup centralized (retries plus `fast=True`); do not
   duplicate network settings.
 - Never add credentials, tokens, or secrets to source, notebooks, or logs. The
-  existing proxy token is hardcoded; do not copy it into new files. Use
-  environment variables for new credentials.
+  proxy token is read from `AKSHARE_PROXY_AUTH_TOKEN` via `python-dotenv`; keep
+  it in the git-ignored `.env` (or environment) and use `.env.example` as the
+  template. Do not copy real tokens into any tracked file.
 - Use `show=False` for generated reports in non-interactive runs. Do not edit
   generated HTML; regenerate it.
 

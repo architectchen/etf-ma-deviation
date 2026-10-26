@@ -22,12 +22,17 @@
 etf_ma_deviation_buy_signal.ipynb       # 只做买入信号扫描、表格和图表
 etf_ma_deviation_buy_sell_signal.ipynb  # 买入/卖出信号扫描和图表
 etf_ma_deviation_buy_sell_backtesting.py # AKQuant 回测脚本
+.env.example                            # 环境变量模板（复制为 .env 使用）
 ```
+
+脚本和 notebook 通过 `python-dotenv` 的 `load_dotenv()` 加载仓库根目录的
+`.env`；`.env` 已加入 `.gitignore`，请勿提交真实的代理令牌。
 
 ## 环境要求
 
 - Python 3.11（当前验证版本为 3.11.15）
 - 可访问 AKShare 数据源及其代理服务的网络环境
+- AKShare 代理认证令牌（通过 `AKSHARE_PROXY_AUTH_TOKEN` 环境变量提供）
 
 ## 安装
 
@@ -42,6 +47,24 @@ python -m pip install -r requirements.txt
 python -m pip install -r requirements-dev.txt
 ```
 
+## 配置代理令牌
+
+脚本和 notebook 通过 `python-dotenv` 读取 `.env`，并使用其中的
+`AKSHARE_PROXY_AUTH_TOKEN` 完成 AKShare 代理认证：
+
+```bash
+cp .env.example .env
+# 编辑 .env，将 AKSHARE_PROXY_AUTH_TOKEN 替换为你的真实令牌
+```
+
+也可以直接导出同名环境变量，无需创建 `.env`：
+
+```bash
+export AKSHARE_PROXY_AUTH_TOKEN="你的令牌"
+```
+
+缺少令牌时 AKShare 数据请求会因认证失败而报错。
+
 ## 配置
 
 脚本和 notebook 顶部的主要配置项（`initial_cash` 仅回测脚本使用）：
@@ -55,6 +78,7 @@ python -m pip install -r requirements-dev.txt
 | `initial_cash`             | 回测初始资金 | `10000.0` |
 
 均线窗口必须为正整数；数据长度不足 `moving_average_window` 条时脚本会报错。
+代理令牌不属于上面的代码配置项，统一通过 `.env` 或环境变量提供。
 
 ## 运行
 
@@ -101,8 +125,13 @@ pytest 时，建议使用确定性的合成行情数据，避免依赖实时网�
 
 ## 数据与网络
 
-数据通过 AKShare 实时获取，执行前请确认网络和代理配置可用。不要在代码、
-notebook 或日志中新增明文凭据；新的代理配置建议使用环境变量管理。
+数据通过 AKShare 实时获取，执行前请确认网络和代理配置可用。代理设置集中在
+脚本和两个 notebook 的首个代码单元中，通过 `akshare_proxy_patch.install_patch`
+统一配置重试、域名白名单和 `fast=True`。
+
+认证令牌只从 `AKSHARE_PROXY_AUTH_TOKEN` 读取，请保存在本地 `.env` 或环境变量
+中，不要写入代码、notebook、日志或提交到 Git。仓库提供了 `.env.example`
+作为模板。
 
 ## 免责声明
 
